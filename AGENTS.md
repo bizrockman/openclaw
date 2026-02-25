@@ -253,3 +253,31 @@
   - `node --import tsx scripts/release-check.ts`
   - `pnpm release:check`
   - `pnpm test:install:smoke` or `OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT=1 pnpm test:install:smoke` for non-root smoke path.
+
+## Cursor Cloud specific instructions
+
+### Environment
+
+- Node 22+ and pnpm 10.23+ are available via nvm (pre-installed).
+- The VM update script runs `pnpm install` on startup; dependencies should already be present.
+
+### Running services
+
+- **Core CLI (dev):** `pnpm openclaw <command>` (auto-builds from source via `scripts/run-node.mjs`).
+- **Gateway (dev):** `pnpm gateway:dev` or `pnpm gateway:watch` (auto-reload). Requires `openclaw config set gateway.mode local` and an AI provider API key to be functional.
+- **Control UI (dev):** `pnpm ui:dev` (needs a running gateway).
+
+### Key commands (see `AGENTS.md` > Build, Test, and Development Commands for full list)
+
+- Lint + format + typecheck: `pnpm check`
+- Tests: `pnpm test` (parallel Vitest). Use `OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1 pnpm test` on memory-constrained hosts.
+- Build: `pnpm build`
+- UI build: `pnpm ui:build`
+
+### Gotchas
+
+- `pnpm openclaw` triggers an auto-rebuild if `dist/` is stale. First invocation after install may take a few extra seconds.
+- One pre-existing test flake in `src/gateway/server.canvas-auth.test.ts` ("authorizes canvas HTTP/WS via node-scoped capability and rejects misuse") may fail intermittently; this is not caused by your changes.
+- The `@discordjs/opus` optional dependency warns about unapproved build scripts; this is harmless and does not affect functionality.
+- No external databases or services are required for the core product; everything uses local SQLite.
+- Native apps (macOS/iOS/Android) cannot be built on Linux; this is expected in Cloud VMs.
